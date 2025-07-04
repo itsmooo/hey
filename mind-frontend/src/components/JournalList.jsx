@@ -10,12 +10,20 @@ const JournalList = ({ user }) => {
   const [filter, setFilter] = useState("all")
 
   useEffect(() => {
-    fetchJournals()
+    if (user && user.id) {
+      fetchJournals()
+    } else {
+      setLoading(false)
+    }
   }, [user])
 
   const fetchJournals = async () => {
     try {
       const token = localStorage.getItem("token")
+      if (!token) {
+        console.error("No token found")
+        return
+      }
       const response = await axios.get(`http://localhost:8080/api/journals/user/${user.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
@@ -66,6 +74,14 @@ const JournalList = ({ user }) => {
     return (
       <div className="flex justify-center items-center min-h-64">
         <div className="text-lg text-gray-600">Loading journals...</div>
+      </div>
+    )
+  }
+
+  if (!user || !user.id) {
+    return (
+      <div className="flex justify-center items-center min-h-64">
+        <div className="text-lg text-gray-600">Please log in to view your journals</div>
       </div>
     )
   }

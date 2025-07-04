@@ -1,15 +1,21 @@
-package com.mindconnect.config;
+package mind_backend.example.mind_connect.config;
 
-import com.mindconnect.entity.Role;
-import com.mindconnect.entity.Motivation;
-import com.mindconnect.entity.Therapist;
-import com.mindconnect.repository.RoleRepository;
-import com.mindconnect.repository.MotivationRepository;
-import com.mindconnect.repository.TherapistRepository;
+import mind_backend.example.mind_connect.entity.Role;
+import mind_backend.example.mind_connect.entity.Motivation;
+import mind_backend.example.mind_connect.entity.Therapist;
+import mind_backend.example.mind_connect.entity.User;
+import mind_backend.example.mind_connect.entity.Session;
+import mind_backend.example.mind_connect.entity.Session.SessionStatus;
+import mind_backend.example.mind_connect.repository.RoleRepository;
+import mind_backend.example.mind_connect.repository.MotivationRepository;
+import mind_backend.example.mind_connect.repository.TherapistRepository;
+import mind_backend.example.mind_connect.repository.UserRepository;
+import mind_backend.example.mind_connect.repository.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import java.time.LocalDateTime;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -22,6 +28,12 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private TherapistRepository therapistRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private SessionRepository sessionRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -118,6 +130,46 @@ public class DataInitializer implements CommandLineRunner {
             quote2.setAuthor("Brené Brown");
             quote2.setCategory("Courage");
             motivationRepository.save(quote2);
+        }
+
+        // Initialize sample sessions
+        if (sessionRepository.count() == 0) {
+            // Get the first user and therapist for sample sessions
+            User sampleUser = userRepository.findByEmail("mohamed@gmail.com").orElse(null);
+            Therapist sampleTherapist = therapistRepository.findByEmail("sarah.johnson@mindconnect.com").orElse(null);
+            
+            if (sampleUser != null && sampleTherapist != null) {
+                // Create sample sessions
+                Session session1 = new Session();
+                session1.setUser(sampleUser);
+                session1.setTherapist(sampleTherapist);
+                session1.setSessionDate(LocalDateTime.now().plusDays(2));
+                session1.setStatus(SessionStatus.SCHEDULED);
+                session1.setSessionType("Individual Therapy");
+                session1.setDuration(60);
+                session1.setNotes("Initial consultation session");
+                sessionRepository.save(session1);
+
+                Session session2 = new Session();
+                session2.setUser(sampleUser);
+                session2.setTherapist(sampleTherapist);
+                session2.setSessionDate(LocalDateTime.now().minusDays(1));
+                session2.setStatus(SessionStatus.COMPLETED);
+                session2.setSessionType("Individual Therapy");
+                session2.setDuration(60);
+                session2.setNotes("Follow-up session - good progress");
+                sessionRepository.save(session2);
+
+                Session session3 = new Session();
+                session3.setUser(sampleUser);
+                session3.setTherapist(sampleTherapist);
+                session3.setSessionDate(LocalDateTime.now().plusDays(7));
+                session3.setStatus(SessionStatus.SCHEDULED);
+                session3.setSessionType("Individual Therapy");
+                session3.setDuration(90);
+                session3.setNotes("Extended session for deep work");
+                sessionRepository.save(session3);
+            }
         }
     }
 }
